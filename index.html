@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Magic Coloring AR</title>
+
+  <!-- A-Frame + MindAR (image tracking) -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#000; }
+    #topHint {
+      position: fixed; top: 14px; left: 14px; right: 14px;
+      display:flex; justify-content:center; z-index: 9999; pointer-events:none;
+    }
+    #topHint > div {
+      background: rgba(0,0,0,.65); color: #fff;
+      padding: 10px 12px; border-radius: 16px; font-weight: 650; font-size: 14px;
+      max-width: 640px; text-align:center;
+    }
+    #ui {
+      position: fixed; left: 14px; right: 14px; bottom: 14px;
+      display:flex; flex-wrap: wrap; gap: 10px; justify-content:center; z-index: 9999;
+    }
+    button, label.uploadBtn {
+      border: 0; border-radius: 16px; padding: 12px 14px; font-weight: 750; font-size: 15px;
+      background: rgba(255,255,255,.92); color:#111;
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    label.uploadBtn { cursor:pointer; }
+    input[type=file] { display:none; }
+    .small { font-weight: 600; font-size: 12px; opacity:.85; }
+    #debug { position: fixed; left: 14px; bottom: 92px; color:#fff; font-size: 12px; z-index: 9999; opacity:.85; }
+    a-scene { position: fixed; inset: 0; }
+  </style>
+</head>
+
+<body>
+  <div id="topHint"><div id="hintText">Loading…</div></div>
+
+  <div id="ui">
+    <label class="uploadBtn" title="Optional: use your drawing colors">
+      Upload drawing photo
+      <input id="photoInput" type="file" accept="image/*" />
+      <div class="small">Optional (for color-matching)</div>
+    </label>
+    <button id="resetTint" title="Reset colors">Reset colors</button>
+  </div>
+
+  <div id="debug"></div>
+
+  <!--
+    REQUIRED FILES (must exist on your website):
+      /targets/targets.mind
+      /assets/character.glb
+    If you see a black screen, it usually means targets.mind isn't being served at:
+      https://YOUR-SITE/targets/targets.mind
+  -->
+  <a-scene
+    mindar-image="imageTargetSrc: /targets/targets.mind; autoStart: true;"
+    renderer="colorManagement: true; physicallyCorrectLights: true;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+    <a-assets timeout="15000">
+      <a-asset-item id="characterModel" src="/assets/character.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity id="anchor" mindar-image-target="targetIndex: 0">
+      <a-entity light="type: ambient; intensity: 0.7"></a-entity>
+      <a-entity light="type: directional; intensity: 0.9" position="0 1 1"></a-entity>
+
+      <a-gltf-model
+        id="character"
+        src="#characterModel"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.6 0.6 0.6">
+      </a-gltf-model>
+
+      <a-entity id="fallbackGeom" visible="false">
+        <a-sphere radius="0.15" position="0 0.15 0"></a-sphere>
+        <a-box depth="0.15" height="0.25" width="0.15" position="0 0.0 0"></a-box>
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <script src="/main.js"></script>
+</body>
+</html>
